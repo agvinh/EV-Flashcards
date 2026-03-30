@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EV Flashcards</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>English &lt;-&gt; Vietnamese Flashcards</h1>
+    <p class="subtitle">Import TSV lines as <code>english + ipa[TAB]vietnamese</code> or <code>english[TAB]ipa[TAB]vietnamese</code></p>
+
+    <section class="panel">
+      <h2>Import</h2>
+      <label for="bulkText">Paste text</label>
+      <textarea id="bulkText" rows="8" placeholder="eagle /ˈiːɡəl/	chim đại bàng&#10;Earth /ɜːrθ/	Trái Đất"></textarea>
+
+      <div class="row">
+        <input id="fileInput" class="hidden-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
+        <button id="browseFileBtn" class="btn btn-browse"><span class="btn-icon" aria-hidden="true">☰</span>Browse File</button>
+        <span id="fileNameLabel" class="file-name">No file chosen</span>
+        <button id="loadTextBtn" class="btn btn-import"><span class="btn-icon" aria-hidden="true">⤓</span>Load From Text</button>
+      </div>
+
+      <div class="history-block">
+        <h3>Local History</h3>
+        <div class="row">
+          <input id="historyNameInput" type="text" placeholder="History name (optional)">
+          <button id="saveHistoryBtn" class="btn btn-save"><span class="btn-icon" aria-hidden="true">⟡</span>Save To History</button>
+        </div>
+        <div class="row">
+          <select id="historySelect"></select>
+        </div>
+        <div class="row">
+          <button id="loadHistoryBtn" class="btn btn-load"><span class="btn-icon" aria-hidden="true">↺</span>Load Selected</button>
+          <button id="deleteHistoryBtn" class="btn btn-delete"><span class="btn-icon" aria-hidden="true">⊖</span>Delete Selected</button>
+          <button id="clearHistoriesBtn" class="btn btn-clear"><span class="btn-icon" aria-hidden="true">⌦</span>Clear All Histories</button>
+        </div>
+        <p id="historyStatus" class="hint"></p>
+      </div>
+      <p class="hint">Stored locally in your browser (no server database).</p>
+    </section>
+
+    <section class="panel">
+      <h2>Flashcard</h2>
+      <div class="toolbar">
+        <button id="prevBtn" class="btn btn-prev"><span class="btn-icon" aria-hidden="true">←</span>Prev</button>
+        <button id="flipBtn" class="btn btn-flip"><span class="btn-icon" aria-hidden="true">⇄</span>Flip</button>
+        <button id="nextBtn" class="btn btn-next"><span class="btn-icon" aria-hidden="true">→</span>Next</button>
+        <button id="shuffleBtn" class="btn btn-shuffle"><span class="btn-icon" aria-hidden="true">⤮</span>Shuffle</button>
+        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">◉</span>Speak English</button>
+      </div>
+
+      <div class="status">
+        <span id="countLabel">0 cards</span>
+        <span id="indexLabel">0 / 0</span>
+      </div>
+
+      <article id="card" class="card">
+        <div class="face front">
+          <h3 id="englishWord">No word loaded</h3>
+          <p id="ipaText" class="ipa"></p>
+          <p id="vietnameseFront" class="meaning"></p>
+        </div>
+        <div class="face back">
+          <h3 id="vietnameseWord"></h3>
+        </div>
+      </article>
+
+      <figure class="image-wrap">
+        <img id="wordImage" alt="Word image" loading="lazy">
+        <figcaption id="imageCaption"></figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
