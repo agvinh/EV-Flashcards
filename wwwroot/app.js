@@ -281,7 +281,27 @@ function setHistoryStatus(message) {
   historyStatus.textContent = message;
 }
 
-function initializeLocalPersistence() {
+async function loadDefaultVocabularyFile() {
+  try {
+    const response = await fetch("data/flashcards_vocab.tsv", { cache: "no-store" });
+    if (!response.ok) {
+      return false;
+    }
+
+    const text = await response.text();
+    if (!text.trim()) {
+      return false;
+    }
+
+    bulkText.value = text;
+    applyInputText(text, true);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function initializeLocalPersistence() {
   loadHistoriesFromStorage();
   renderHistorySelect();
 
@@ -291,7 +311,13 @@ function initializeLocalPersistence() {
     applyInputText(lastList, false);
     setHistoryStatus("Restored last session.");
   } else {
-    setHistoryStatus("No previous session found.");
+    const loadedDefault = await loadDefaultVocabularyFile();
+    if (loadedDefault) {
+      setHistoryStatus("Loaded default vocabulary file.");
+    } else {
+      setHistoryStatus("No previous session found.");
+      renderCard();
+    }
   }
 }
 
@@ -466,6 +492,3 @@ function speak(text) {
 }
 
 initializeLocalPersistence();
-if (!cards.length) {
-  renderCard();
-}
