@@ -7,7 +7,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "data")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.WebRootPath, "data")),
     RequestPath = "/data"
 });
 

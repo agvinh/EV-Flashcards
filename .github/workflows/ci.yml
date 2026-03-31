@@ -23,3 +23,8 @@ jobs:
 
       - name: Build
         run: dotnet build EV-Flashcards.csproj --configuration Release --no-restore
+
+      - name: Validate default vocabulary data in wwwroot
+        run: |
+          test -d wwwroot/data
+          test -f wwwroot/data/flashcards_vocab.tsv
