@@ -9,15 +9,15 @@
 <body>
   <main class="container">
     <h1>English &lt;-&gt; Vietnamese Flashcards</h1>
-    <p class="subtitle">Import TSV lines as <code>english + ipa[TAB]vietnamese</code> or <code>english[TAB]ipa[TAB]vietnamese</code></p>
+    <p class="subtitle">Import as <code>english</code>, <code>english + ipa[TAB]vietnamese</code>, or <code>english[TAB]ipa[TAB]vietnamese</code></p>
 
     <section class="panel">
       <h2>Import</h2>
       <label for="bulkText">Paste text</label>
-      <textarea id="bulkText" rows="8" placeholder="eagle /ˈiːɡəl/	chim đại bàng&#10;Earth /ɜːrθ/	Trái Đất"></textarea>
+      <textarea id="bulkText" rows="8" placeholder="eagle&#10;earth&#10;eagle /ˈiːɡəl/	chim đại bàng"></textarea>
 
       <div class="row">
-        <input id="fileInput" class="hidden-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
+        <input id="fileInput" name="fileInput" class="hidden-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
         <button id="browseFileBtn" class="btn btn-browse"><span class="btn-icon" aria-hidden="true">☰</span>Browse File</button>
         <span id="fileNameLabel" class="file-name">No file chosen</span>
         <button id="loadTextBtn" class="btn btn-import"><span class="btn-icon" aria-hidden="true">⤓</span>Load From Text</button>
@@ -39,7 +39,6 @@
         </div>
         <p id="historyStatus" class="hint"></p>
       </div>
-      <p class="hint">Stored locally in your browser (no server database).</p>
     </section>
 
     <section class="panel">
@@ -49,7 +48,8 @@
         <button id="flipBtn" class="btn btn-flip"><span class="btn-icon" aria-hidden="true">⇄</span>Flip</button>
         <button id="nextBtn" class="btn btn-next"><span class="btn-icon" aria-hidden="true">→</span>Next</button>
         <button id="shuffleBtn" class="btn btn-shuffle"><span class="btn-icon" aria-hidden="true">⤮</span>Shuffle</button>
-        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">◉</span>Speak English</button>
+        <button id="voiceToggleBtn" class="btn btn-voice"><span class="btn-icon" aria-hidden="true">♀</span>Voice: Female</button>
+        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">🔊</span>Speak English</button>
       </div>
 
       <div class="status">

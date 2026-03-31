@@ -7,6 +7,7 @@ const prevBtn = document.getElementById("prevBtn");
 const flipBtn = document.getElementById("flipBtn");
 const nextBtn = document.getElementById("nextBtn");
 const shuffleBtn = document.getElementById("shuffleBtn");
+const voiceToggleBtn = document.getElementById("voiceToggleBtn");
 const speakBtn = document.getElementById("speakBtn");
 const historyNameInput = document.getElementById("historyNameInput");
 const saveHistoryBtn = document.getElementById("saveHistoryBtn");
@@ -30,9 +31,14 @@ let cards = [];
 let currentIndex = 0;
 let showFront = true;
 let histories = [];
+let selectedVoiceGender = "female";
+let currentAudio = null;
+let availableSpeechVoices = [];
 
 const HISTORY_KEY = "ev_flashcards_histories_v1";
 const LAST_LIST_KEY = "ev_flashcards_last_list_v1";
+const FEMALE_VOICE_HINTS = ["zira", "aria", "jenny", "samantha", "victoria", "ava", "emma", "susan", "female", "woman", "girl", "joanna", "kimberly", "salli"];
+const MALE_VOICE_HINTS = ["david", "guy", "ryan", "mark", "daniel", "alex", "george", "male", "man", "boy", "matthew", "brian", "justin"];
 
 loadTextBtn.addEventListener("click", () => {
   applyInputText(bulkText.value, true);
@@ -92,6 +98,11 @@ shuffleBtn.addEventListener("click", () => {
   currentIndex = 0;
   showFront = true;
   renderCard();
+});
+
+voiceToggleBtn.addEventListener("click", () => {
+  selectedVoiceGender = selectedVoiceGender === "female" ? "male" : "female";
+  updateVoiceToggleUi();
 });
 
 speakBtn.addEventListener("click", () => {
@@ -326,11 +337,12 @@ function parseInputToCards(text) {
   const parsed = [];
 
   for (const line of lines) {
-    const parts = line.includes("\t")
+    const isTabSeparated = line.includes("\t");
+    const parts = isTabSeparated
       ? line.split("\t").map((x) => x.trim())
       : line.split(",").map((x) => x.trim());
 
-    if (parts.length < 2) {
+    if (parts.length < 1) {
       continue;
     }
 
@@ -338,18 +350,22 @@ function parseInputToCards(text) {
     let ipa = "";
     let vietnamese = "";
 
-    if (parts.length >= 3) {
-      english = parts[0];
-      ipa = parts[1];
-      vietnamese = parts.slice(2).join(line.includes("\t") ? "\t" : ",").trim();
-    } else {
-      vietnamese = parts[1];
+    if (parts.length === 1) {
       const englishAndIpa = extractEnglishAndIpa(parts[0]);
       english = englishAndIpa.english;
       ipa = englishAndIpa.ipa;
+    } else if (parts.length >= 3) {
+      english = parts[0];
+      ipa = parts[1];
+      vietnamese = parts.slice(2).join(isTabSeparated ? "\t" : ",").trim();
+    } else {
+      const englishAndIpa = extractEnglishAndIpa(parts[0]);
+      english = englishAndIpa.english;
+      ipa = englishAndIpa.ipa;
+      vietnamese = parts[1];
     }
 
-    if (!english || !vietnamese) {
+    if (!english) {
       continue;
     }
     parsed.push({ english, vietnamese, ipa, imageUrl: "" });
@@ -407,8 +423,8 @@ async function renderCard() {
 
   const item = cards[currentIndex];
   englishWord.textContent = item.english;
-  vietnameseWord.textContent = item.vietnamese;
-  vietnameseFront.textContent = item.vietnamese;
+  vietnameseWord.textContent = item.vietnamese || "Loading meaning...";
+  vietnameseFront.textContent = item.vietnamese || "Loading meaning...";
   ipaText.textContent = item.ipa || "Loading IPA...";
   wordImage.removeAttribute("src");
   imageCaption.textContent = "Loading image...";
@@ -416,10 +432,13 @@ async function renderCard() {
   renderCardFaces();
 
   await Promise.all([
+    hydrateVietnamese(item),
     hydrateIpa(item),
     hydrateImage(item)
   ]);
 
+  vietnameseWord.textContent = item.vietnamese || "Vietnamese meaning not available";
+  vietnameseFront.textContent = item.vietnamese || "Vietnamese meaning not available";
   ipaText.textContent = item.ipa || "IPA not available";
   if (item.imageUrl) {
     wordImage.src = item.imageUrl;
@@ -427,6 +446,34 @@ async function renderCard() {
     imageCaption.textContent = "Image from Wikimedia Commons";
   } else {
     imageCaption.textContent = "Image not available";
+  }
+}
+
+async function hydrateVietnamese(cardItem) {
+  if (cardItem.vietnamese) {
+    return;
+  }
+
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cardItem.english)}&langpair=en|vi`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      cardItem.vietnamese = "";
+      return;
+    }
+
+    const data = await response.json();
+    const translatedText = data?.responseData?.translatedText?.trim();
+    if (!translatedText) {
+      cardItem.vietnamese = "";
+      return;
+    }
+
+    cardItem.vietnamese = translatedText.toLowerCase() === cardItem.english.toLowerCase()
+      ? ""
+      : translatedText;
+  } catch {
+    cardItem.vietnamese = "";
   }
 }
 
@@ -458,7 +505,7 @@ async function hydrateImage(cardItem) {
 
   try {
     const query = encodeURIComponent(cardItem.english);
-    const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${query}&gsrnamespace=6&gsrlimit=1&prop=imageinfo&iiprop=url`;
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${query}&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime`;
     const response = await fetch(url);
     if (!response.ok) {
       cardItem.imageUrl = "";
@@ -472,23 +519,146 @@ async function hydrateImage(cardItem) {
       return;
     }
 
-    const firstPage = Object.values(pages)[0];
-    const imageInfo = firstPage?.imageinfo?.[0];
-    cardItem.imageUrl = imageInfo?.url || "";
+    const pageList = Object.values(pages);
+    const validImageInfos = pageList
+      .map((p) => p?.imageinfo?.[0])
+      .filter((info) => isRenderableImageInfo(info));
+
+    if (!validImageInfos.length) {
+      cardItem.imageUrl = "";
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * validImageInfos.length);
+    cardItem.imageUrl = validImageInfos[randomIndex].url;
   } catch {
     cardItem.imageUrl = "";
   }
 }
 
+function isRenderableImageInfo(info) {
+  if (!info?.url || !info?.mime) {
+    return false;
+  }
+
+  const mime = info.mime.toLowerCase();
+  if (!mime.startsWith("image/")) {
+    return false;
+  }
+
+  // Keep browser-friendly image types.
+  return (
+    mime === "image/jpeg" ||
+    mime === "image/jpg" ||
+    mime === "image/png" ||
+    mime === "image/gif" ||
+    mime === "image/webp" ||
+    mime === "image/svg+xml"
+  );
+}
+
 function speak(text) {
+  speakViaApi(text).catch(() => {
+    speakViaBrowser(text);
+  });
+}
+
+function updateVoiceToggleUi() {
+  const isFemale = selectedVoiceGender === "female";
+  voiceToggleBtn.innerHTML = isFemale
+    ? '<span class="btn-icon" aria-hidden="true">♀</span>Voice: Female'
+    : '<span class="btn-icon" aria-hidden="true">♂</span>Voice: Male';
+}
+
+async function speakViaApi(text) {
+  if (!text) {
+    return;
+  }
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+
+  const voiceName = selectedVoiceGender === "female" ? "Joanna" : "Matthew";
+  const apiUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
+  const audio = new Audio(apiUrl);
+  currentAudio = audio;
+
+  try {
+    await audio.play();
+  } finally {
+    audio.onended = () => {
+      if (currentAudio === audio) {
+        currentAudio = null;
+      }
+    };
+  }
+}
+
+function speakViaBrowser(text) {
   if (!("speechSynthesis" in window)) {
     return;
   }
+
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "en-US";
   utterance.rate = 0.95;
+  utterance.pitch = selectedVoiceGender === "female" ? 1.15 : 0.9;
+  const selected = selectBrowserVoice(selectedVoiceGender);
+  if (selected) {
+    utterance.voice = selected;
+  }
   window.speechSynthesis.speak(utterance);
 }
 
+function refreshSpeechVoices() {
+  if (!("speechSynthesis" in window)) {
+    availableSpeechVoices = [];
+    return;
+  }
+  availableSpeechVoices = window.speechSynthesis.getVoices() || [];
+}
+
+function selectBrowserVoice(gender) {
+  const englishVoices = availableSpeechVoices.filter((v) =>
+    (v.lang || "").toLowerCase().startsWith("en")
+  );
+  if (!englishVoices.length) {
+    return null;
+  }
+
+  const preferredHints = gender === "female" ? FEMALE_VOICE_HINTS : MALE_VOICE_HINTS;
+  const oppositeHints = gender === "female" ? MALE_VOICE_HINTS : FEMALE_VOICE_HINTS;
+
+  const exact = englishVoices.find((v) => {
+    const name = (v.name || "").toLowerCase();
+    return preferredHints.some((h) => name.includes(h));
+  });
+  if (exact) {
+    return exact;
+  }
+
+  const nonOpposite = englishVoices.find((v) => {
+    const name = (v.name || "").toLowerCase();
+    return !oppositeHints.some((h) => name.includes(h));
+  });
+  return nonOpposite || englishVoices[0];
+}
+
+updateVoiceToggleUi();
+refreshSpeechVoices();
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = refreshSpeechVoices;
+}
 initializeLocalPersistence();

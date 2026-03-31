@@ -172,6 +172,12 @@ select {
   border-color: #89c5eb;
 }
 
+.btn-voice {
+  background: linear-gradient(180deg, #fff4fa, #ffe1f2);
+  color: #7c1f4f;
+  border-color: #ec9ec7;
+}
+
 .btn-browse {
   background: linear-gradient(180deg, #f8f8ff, #ececff);
   color: #343466;
