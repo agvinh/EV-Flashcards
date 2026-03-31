@@ -214,6 +214,53 @@ select {
   margin-bottom: 10px;
 }
 
+.table-wrap {
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background: #ffffff;
+}
+
+.vocab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.vocab-table th,
+.vocab-table td {
+  border-bottom: 1px solid #e8edf7;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.vocab-table th {
+  position: sticky;
+  top: 0;
+  background: #f2f7ff;
+  color: #2a3f6d;
+  z-index: 1;
+}
+
+.vocab-table tbody tr {
+  cursor: pointer;
+}
+
+.vocab-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.vocab-table tbody tr.selected-row {
+  background: #e9f4ff;
+}
+
+.empty-table {
+  color: var(--muted);
+  text-align: center;
+}
+
 .card {
   border: 1px solid var(--border);
   border-radius: 12px;

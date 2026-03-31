@@ -26,6 +26,7 @@ const wordImage = document.getElementById("wordImage");
 const imageCaption = document.getElementById("imageCaption");
 const countLabel = document.getElementById("countLabel");
 const indexLabel = document.getElementById("indexLabel");
+const vocabTableBody = document.getElementById("vocabTableBody");
 
 let cards = [];
 let currentIndex = 0;
@@ -128,10 +129,27 @@ clearHistoriesBtn.addEventListener("click", () => {
   clearAllHistories();
 });
 
+vocabTableBody.addEventListener("click", (event) => {
+  const row = event.target.closest("tr[data-index]");
+  if (!row) {
+    return;
+  }
+
+  const rowIndex = Number(row.dataset.index);
+  if (Number.isNaN(rowIndex) || rowIndex < 0 || rowIndex >= cards.length) {
+    return;
+  }
+
+  currentIndex = rowIndex;
+  showFront = true;
+  renderCard();
+});
+
 function applyInputText(text, persistLastList) {
   cards = parseInputToCards(text);
   currentIndex = 0;
   showFront = true;
+  renderVocabTable();
   renderCard();
 
   if (persistLastList) {
@@ -403,6 +421,37 @@ function renderCardFaces() {
   card.classList.toggle("show-back", !showFront);
 }
 
+function renderVocabTable() {
+  if (!cards.length) {
+    vocabTableBody.innerHTML = '<tr><td colspan="4" class="empty-table">No words loaded</td></tr>';
+    return;
+  }
+
+  vocabTableBody.innerHTML = cards.map((item, idx) => {
+    const selectedClass = idx === currentIndex ? "selected-row" : "";
+    const ipa = item.ipa || "";
+    const vietnamese = item.vietnamese || "";
+
+    return `
+      <tr class="${selectedClass}" data-index="${idx}">
+        <td>${idx + 1}</td>
+        <td>${escapeHtml(item.english)}</td>
+        <td>${escapeHtml(ipa)}</td>
+        <td>${escapeHtml(vietnamese)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 async function renderCard() {
   const total = cards.length;
   countLabel.textContent = `${total} cards`;
@@ -418,6 +467,7 @@ async function renderCard() {
     indexLabel.textContent = "0 / 0";
     card.classList.add("show-front");
     card.classList.remove("show-back");
+    renderVocabTable();
     return;
   }
 
@@ -447,6 +497,8 @@ async function renderCard() {
   } else {
     imageCaption.textContent = "Image not available";
   }
+
+  renderVocabTable();
 }
 
 async function hydrateVietnamese(cardItem) {
