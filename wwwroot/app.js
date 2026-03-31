@@ -17,6 +17,10 @@ const loadHistoryBtn = document.getElementById("loadHistoryBtn");
 const deleteHistoryBtn = document.getElementById("deleteHistoryBtn");
 const clearHistoriesBtn = document.getElementById("clearHistoriesBtn");
 const historyStatus = document.getElementById("historyStatus");
+const importPanel = document.getElementById("import-panel");
+const importPanelBody = document.getElementById("importPanelBody");
+const toggleImportPanelBtn = document.getElementById("toggleImportPanelBtn");
+const toggleImportPanelText = document.getElementById("toggleImportPanelText");
 
 const card = document.getElementById("card");
 const englishWord = document.getElementById("englishWord");
@@ -266,6 +270,11 @@ clearHistoriesBtn.addEventListener("click", () => {
   clearAllHistories();
 });
 
+toggleImportPanelBtn.addEventListener("click", () => {
+  importPanel.classList.toggle("expanded");
+  updateImportPanelUi();
+});
+
 vocabTableBody.addEventListener("click", (event) => {
   const row = event.target.closest("tr[data-index]");
   if (!row) {
@@ -322,6 +331,8 @@ function applyStaticTranslations() {
   if (lastHistoryStatus) {
     historyStatus.textContent = t(lastHistoryStatus.key, lastHistoryStatus.vars);
   }
+
+  updateImportPanelUi();
 }
 
 function setHistoryStatusKey(key, vars = {}) {
@@ -822,6 +833,23 @@ function speak(text) {
 function updateVoiceToggleUi() {
   const isFemale = selectedVoiceGender === "female";
   voiceToggleText.textContent = isFemale ? t("voiceFemale") : t("voiceMale");
+}
+
+function updateImportPanelUi() {
+  const expanded = importPanel.classList.contains("expanded");
+  importPanelBody.hidden = !expanded;
+  toggleImportPanelBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+
+  const icon = toggleImportPanelBtn.querySelector(".btn-icon");
+  if (icon) {
+    icon.textContent = expanded ? "▾" : "▸";
+  }
+
+  if (currentLang === "vi") {
+    toggleImportPanelText.textContent = expanded ? "Thu gọn" : "Mở rộng";
+  } else {
+    toggleImportPanelText.textContent = expanded ? "Collapse" : "Expand";
+  }
 }
 
 async function speakViaApi(text) {

@@ -50,6 +50,14 @@ h1 {
   box-shadow: 0 3px 10px rgba(11, 22, 44, 0.04);
 }
 
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 textarea {
   width: 100%;
   margin-top: 8px;
@@ -195,6 +203,12 @@ select {
   background: linear-gradient(180deg, #fff8e8, #ffe9bd);
   color: #6f4d00;
   border-color: #e7be63;
+}
+
+.btn-toggle-panel {
+  background: linear-gradient(180deg, #f4f7ff, #e6edff);
+  color: #304579;
+  border-color: #aec1ef;
 }
 
 .hint {

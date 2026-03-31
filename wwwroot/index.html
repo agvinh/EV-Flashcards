@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -10,45 +10,55 @@
 <body>
   <main class="container">
     <div class="topbar">
-      <h1 id="titleText">English &lt;-&gt; Vietnamese Flashcards</h1>
+      <h1 id="titleText">English <-> Vietnamese Flashcards</h1>
       <button id="languageToggleBtn" class="btn btn-language">
-        <span class="btn-icon" aria-hidden="true">🌐</span>
+        <span class="btn-icon" aria-hidden="true">&#127760;</span>
         <span id="languageToggleText">Ngon ngu: Tieng Viet</span>
       </button>
     </div>
+
     <p id="subtitleText" class="subtitle">Import as <code>english</code>, <code>english + ipa[TAB]vietnamese</code>, or <code>english[TAB]ipa[TAB]vietnamese</code></p>
 
-    <section class="panel">
-      <h2 id="importSectionTitle">Import</h2>
-      <label id="bulkTextLabel" for="bulkText">Paste text</label>
-      <textarea id="bulkText" rows="8" placeholder="eagle&#10;earth&#10;eagle /ˈiːɡəl/	chim dai bang"></textarea>
-
-      <div class="row">
-        <input id="fileInput" name="fileInput" class="hidden-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
-        <button id="browseFileBtn" class="btn btn-browse"><span class="btn-icon" aria-hidden="true">☰</span><span id="browseFileText">Browse File</span></button>
-        <span id="fileNameLabel" class="file-name">No file chosen</span>
-        <button id="loadTextBtn" class="btn btn-import"><span class="btn-icon" aria-hidden="true">⤓</span><span id="loadFromTextText">Load From Text</span></button>
+    <section id="import-panel" class="panel expanded">
+      <div class="panel-header">
+        <h2 id="importSectionTitle">Import</h2>
+        <button id="toggleImportPanelBtn" class="btn btn-toggle-panel" aria-expanded="true">
+          <span class="btn-icon" aria-hidden="true">&#9662;</span>
+          <span id="toggleImportPanelText">Thu gon</span>
+        </button>
       </div>
 
-      <div class="history-block">
-        <h3 id="historyTitle">Local History</h3>
+      <div id="importPanelBody">
+        <label id="bulkTextLabel" for="bulkText">Paste text</label>
+        <textarea id="bulkText" rows="8" placeholder="eagle&#10;earth&#10;eagle /i:gl/\tchim dai bang"></textarea>
+
         <div class="row">
-          <input id="historyNameInput" type="text" placeholder="History name (optional)">
-          <button id="saveHistoryBtn" class="btn btn-save"><span class="btn-icon" aria-hidden="true">⟡</span><span id="saveHistoryText">Save To History</span></button>
+          <input id="fileInput" name="fileInput" class="hidden-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
+          <button id="browseFileBtn" class="btn btn-browse"><span class="btn-icon" aria-hidden="true">&#9776;</span><span id="browseFileText">Browse File</span></button>
+          <span id="fileNameLabel" class="file-name">No file chosen</span>
+          <button id="loadTextBtn" class="btn btn-import"><span class="btn-icon" aria-hidden="true">&#10515;</span><span id="loadFromTextText">Load From Text</span></button>
         </div>
-        <div class="row">
-          <select id="historySelect"></select>
+
+        <div class="history-block">
+          <h3 id="historyTitle">Local History</h3>
+          <div class="row">
+            <input id="historyNameInput" type="text" placeholder="History name (optional)">
+            <button id="saveHistoryBtn" class="btn btn-save"><span class="btn-icon" aria-hidden="true">&#10022;</span><span id="saveHistoryText">Save To History</span></button>
+          </div>
+          <div class="row">
+            <select id="historySelect"></select>
+          </div>
+          <div class="row">
+            <button id="loadHistoryBtn" class="btn btn-load"><span class="btn-icon" aria-hidden="true">&#8634;</span><span id="loadHistoryText">Load Selected</span></button>
+            <button id="deleteHistoryBtn" class="btn btn-delete"><span class="btn-icon" aria-hidden="true">&#8854;</span><span id="deleteHistoryText">Delete Selected</span></button>
+            <button id="clearHistoriesBtn" class="btn btn-clear"><span class="btn-icon" aria-hidden="true">&#8998;</span><span id="clearHistoriesText">Clear All Histories</span></button>
+          </div>
+          <p id="historyStatus" class="hint"></p>
         </div>
-        <div class="row">
-          <button id="loadHistoryBtn" class="btn btn-load"><span class="btn-icon" aria-hidden="true">↺</span><span id="loadHistoryText">Load Selected</span></button>
-          <button id="deleteHistoryBtn" class="btn btn-delete"><span class="btn-icon" aria-hidden="true">⊖</span><span id="deleteHistoryText">Delete Selected</span></button>
-          <button id="clearHistoriesBtn" class="btn btn-clear"><span class="btn-icon" aria-hidden="true">⌦</span><span id="clearHistoriesText">Clear All Histories</span></button>
-        </div>
-        <p id="historyStatus" class="hint"></p>
       </div>
     </section>
 
-    <section class="panel">
+    <section id="flashcard-panel" class="panel">
       <h2 id="flashcardSectionTitle">Flashcard</h2>
 
       <div class="status">
@@ -75,12 +85,12 @@
       </div>
 
       <div class="toolbar">
-        <button id="prevBtn" class="btn btn-prev"><span class="btn-icon" aria-hidden="true">←</span><span id="prevText">Prev</span></button>
-        <button id="flipBtn" class="btn btn-flip"><span class="btn-icon" aria-hidden="true">⇄</span><span id="flipText">Flip</span></button>
-        <button id="nextBtn" class="btn btn-next"><span class="btn-icon" aria-hidden="true">→</span><span id="nextText">Next</span></button>
-        <button id="shuffleBtn" class="btn btn-shuffle"><span class="btn-icon" aria-hidden="true">⤮</span><span id="shuffleText">Shuffle</span></button>
-        <button id="voiceToggleBtn" class="btn btn-voice"><span class="btn-icon" aria-hidden="true">♀</span><span id="voiceToggleText">Voice: Female</span></button>
-        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">🔊</span><span id="speakText">Speak English</span></button>
+        <button id="prevBtn" class="btn btn-prev"><span class="btn-icon" aria-hidden="true">&#8592;</span><span id="prevText">Prev</span></button>
+        <button id="flipBtn" class="btn btn-flip"><span class="btn-icon" aria-hidden="true">&#8644;</span><span id="flipText">Flip</span></button>
+        <button id="nextBtn" class="btn btn-next"><span class="btn-icon" aria-hidden="true">&#8594;</span><span id="nextText">Next</span></button>
+        <button id="shuffleBtn" class="btn btn-shuffle"><span class="btn-icon" aria-hidden="true">&#10542;</span><span id="shuffleText">Shuffle</span></button>
+        <button id="voiceToggleBtn" class="btn btn-voice"><span class="btn-icon" aria-hidden="true">&#9792;</span><span id="voiceToggleText">Voice: Female</span></button>
+        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">&#128266;</span><span id="speakText">Speak English</span></button>
       </div>
 
       <article id="card" class="card">
