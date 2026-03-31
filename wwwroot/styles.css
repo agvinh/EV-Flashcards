@@ -25,6 +25,13 @@ body {
   padding: 24px 16px 36px;
 }
 
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 h1 {
   margin: 0 0 8px;
 }
@@ -184,6 +191,12 @@ select {
   border-color: #babaf2;
 }
 
+.btn-language {
+  background: linear-gradient(180deg, #fff8e8, #ffe9bd);
+  color: #6f4d00;
+  border-color: #e7be63;
+}
+
 .hint {
   color: var(--muted);
   margin-bottom: 0;
@@ -317,6 +330,11 @@ select {
 }
 
 @media (max-width: 640px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .card h3 {
     font-size: 1.6rem;
   }

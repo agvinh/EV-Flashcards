@@ -9,6 +9,7 @@ const nextBtn = document.getElementById("nextBtn");
 const shuffleBtn = document.getElementById("shuffleBtn");
 const voiceToggleBtn = document.getElementById("voiceToggleBtn");
 const speakBtn = document.getElementById("speakBtn");
+const languageToggleBtn = document.getElementById("languageToggleBtn");
 const historyNameInput = document.getElementById("historyNameInput");
 const saveHistoryBtn = document.getElementById("saveHistoryBtn");
 const historySelect = document.getElementById("historySelect");
@@ -28,6 +29,29 @@ const countLabel = document.getElementById("countLabel");
 const indexLabel = document.getElementById("indexLabel");
 const vocabTableBody = document.getElementById("vocabTableBody");
 
+const titleText = document.getElementById("titleText");
+const subtitleText = document.getElementById("subtitleText");
+const languageToggleText = document.getElementById("languageToggleText");
+const importSectionTitle = document.getElementById("importSectionTitle");
+const bulkTextLabel = document.getElementById("bulkTextLabel");
+const browseFileText = document.getElementById("browseFileText");
+const loadFromTextText = document.getElementById("loadFromTextText");
+const historyTitle = document.getElementById("historyTitle");
+const saveHistoryText = document.getElementById("saveHistoryText");
+const loadHistoryText = document.getElementById("loadHistoryText");
+const deleteHistoryText = document.getElementById("deleteHistoryText");
+const clearHistoriesText = document.getElementById("clearHistoriesText");
+const flashcardSectionTitle = document.getElementById("flashcardSectionTitle");
+const prevText = document.getElementById("prevText");
+const flipText = document.getElementById("flipText");
+const nextText = document.getElementById("nextText");
+const shuffleText = document.getElementById("shuffleText");
+const voiceToggleText = document.getElementById("voiceToggleText");
+const speakText = document.getElementById("speakText");
+const thEnglish = document.getElementById("thEnglish");
+const thIpa = document.getElementById("thIpa");
+const thVietnamese = document.getElementById("thVietnamese");
+
 let cards = [];
 let currentIndex = 0;
 let showFront = true;
@@ -35,11 +59,114 @@ let histories = [];
 let selectedVoiceGender = "female";
 let currentAudio = null;
 let availableSpeechVoices = [];
+let selectedFileName = "";
+let currentLang = "vi";
+let lastHistoryStatus = null;
 
 const HISTORY_KEY = "ev_flashcards_histories_v1";
 const LAST_LIST_KEY = "ev_flashcards_last_list_v1";
+const LANG_COOKIE_KEY = "ev_flashcards_ui_lang";
 const FEMALE_VOICE_HINTS = ["zira", "aria", "jenny", "samantha", "victoria", "ava", "emma", "susan", "female", "woman", "girl", "joanna", "kimberly", "salli"];
 const MALE_VOICE_HINTS = ["david", "guy", "ryan", "mark", "daniel", "alex", "george", "male", "man", "boy", "matthew", "brian", "justin"];
+
+const I18N = {
+  vi: {
+    title: "Flashcards Anh <-> Việt",
+    subtitle: "Nhập dữ liệu theo <code>english</code>, <code>english + ipa[TAB]vietnamese</code>, hoặc <code>english[TAB]ipa[TAB]vietnamese</code>",
+    languageLabel: "Ngôn ngữ: Tiếng Việt",
+    importTitle: "Nhập Dữ Liệu",
+    pasteText: "Dán text",
+    browseFile: "Chọn file",
+    noFileChosen: "Chưa chọn file",
+    loadFromText: "Tải từ text",
+    historyTitle: "Lịch sử cục bộ",
+    historyNamePlaceholder: "Tên lịch sử (tùy chọn)",
+    saveToHistory: "Lưu lịch sử",
+    loadSelected: "Tải mục chọn",
+    deleteSelected: "Xóa mục chọn",
+    clearAllHistories: "Xóa toàn bộ lịch sử",
+    flashcardTitle: "Flashcard",
+    prev: "Trước",
+    flip: "Lật",
+    next: "Sau",
+    shuffle: "Trộn",
+    speakEnglish: "Đọc tiếng Anh",
+    voiceFemale: "Giọng: Nữ",
+    voiceMale: "Giọng: Nam",
+    tableEnglish: "Tiếng Anh",
+    tableIpa: "IPA",
+    tableVietnamese: "Tiếng Việt",
+    noWordsLoaded: "Chưa có từ vựng",
+    cardsCount: "{count} từ",
+    loadingMeaning: "Đang tải nghĩa...",
+    loadingIpa: "Đang tải IPA...",
+    loadingImage: "Đang tải hình...",
+    imageFromCommons: "Hình từ Wikimedia Commons",
+    imageNotAvailable: "Không có hình phù hợp",
+    ipaNotAvailable: "Không có IPA",
+    meaningNotAvailable: "Không tìm thấy nghĩa tiếng Việt",
+    savedHistoriesEmpty: "Chưa có lịch sử đã lưu",
+    historyNothingToSave: "Không có dữ liệu để lưu.",
+    historyInvalidInput: "Định dạng dữ liệu không hợp lệ.",
+    historySaved: 'Đã lưu "{name}".',
+    historyNoSelection: "Chưa chọn lịch sử.",
+    historyNotFound: "Không tìm thấy mục lịch sử đã chọn.",
+    historyLoaded: 'Đã tải "{name}".',
+    historyDeleted: "Đã xóa mục lịch sử đã chọn.",
+    historyCleared: "Đã xóa toàn bộ lịch sử.",
+    historyRestoreSession: "Đã khôi phục lần học trước.",
+    historyDefaultLoaded: "Đã tải danh sách mặc định.",
+    historyNoPrevious: "Không có dữ liệu trước đó."
+  },
+  en: {
+    title: "English <-> Vietnamese Flashcards",
+    subtitle: "Import as <code>english</code>, <code>english + ipa[TAB]vietnamese</code>, or <code>english[TAB]ipa[TAB]vietnamese</code>",
+    languageLabel: "Language: English",
+    importTitle: "Import",
+    pasteText: "Paste text",
+    browseFile: "Browse File",
+    noFileChosen: "No file chosen",
+    loadFromText: "Load From Text",
+    historyTitle: "Local History",
+    historyNamePlaceholder: "History name (optional)",
+    saveToHistory: "Save To History",
+    loadSelected: "Load Selected",
+    deleteSelected: "Delete Selected",
+    clearAllHistories: "Clear All Histories",
+    flashcardTitle: "Flashcard",
+    prev: "Prev",
+    flip: "Flip",
+    next: "Next",
+    shuffle: "Shuffle",
+    speakEnglish: "Speak English",
+    voiceFemale: "Voice: Female",
+    voiceMale: "Voice: Male",
+    tableEnglish: "English",
+    tableIpa: "IPA",
+    tableVietnamese: "Vietnamese",
+    noWordsLoaded: "No words loaded",
+    cardsCount: "{count} cards",
+    loadingMeaning: "Loading meaning...",
+    loadingIpa: "Loading IPA...",
+    loadingImage: "Loading image...",
+    imageFromCommons: "Image from Wikimedia Commons",
+    imageNotAvailable: "Image not available",
+    ipaNotAvailable: "IPA not available",
+    meaningNotAvailable: "Vietnamese meaning not available",
+    savedHistoriesEmpty: "No saved histories",
+    historyNothingToSave: "Nothing to save.",
+    historyInvalidInput: "Input format is invalid.",
+    historySaved: 'Saved "{name}".',
+    historyNoSelection: "No history selected.",
+    historyNotFound: "Selected history was not found.",
+    historyLoaded: 'Loaded "{name}".',
+    historyDeleted: "Deleted selected history.",
+    historyCleared: "All histories cleared.",
+    historyRestoreSession: "Restored last session.",
+    historyDefaultLoaded: "Loaded default vocabulary file.",
+    historyNoPrevious: "No previous session found."
+  }
+};
 
 loadTextBtn.addEventListener("click", () => {
   applyInputText(bulkText.value, true);
@@ -52,11 +179,13 @@ browseFileBtn.addEventListener("click", () => {
 fileInput.addEventListener("change", async (event) => {
   const file = event.target.files?.[0];
   if (!file) {
-    fileNameLabel.textContent = "No file chosen";
+    selectedFileName = "";
+    fileNameLabel.textContent = t("noFileChosen");
     return;
   }
 
-  fileNameLabel.textContent = file.name;
+  selectedFileName = file.name;
+  fileNameLabel.textContent = selectedFileName;
   const content = await file.text();
   bulkText.value = content;
   applyInputText(content, true);
@@ -72,12 +201,11 @@ prevBtn.addEventListener("click", () => {
 });
 
 nextBtn.addEventListener("click", () => {
-  if (!cards.length) {
-    return;
-  }
-  currentIndex = (currentIndex + 1) % cards.length;
-  showFront = true;
-  renderCard();
+  goToNextCard();
+});
+
+wordImage.addEventListener("click", () => {
+  goToNextCard();
 });
 
 flipBtn.addEventListener("click", () => {
@@ -104,6 +232,15 @@ shuffleBtn.addEventListener("click", () => {
 voiceToggleBtn.addEventListener("click", () => {
   selectedVoiceGender = selectedVoiceGender === "female" ? "male" : "female";
   updateVoiceToggleUi();
+});
+
+languageToggleBtn.addEventListener("click", () => {
+  currentLang = currentLang === "vi" ? "en" : "vi";
+  setCookie(LANG_COOKIE_KEY, currentLang, 365);
+  applyStaticTranslations();
+  renderHistorySelect();
+  renderVocabTable();
+  renderCard();
 });
 
 speakBtn.addEventListener("click", () => {
@@ -144,6 +281,71 @@ vocabTableBody.addEventListener("click", (event) => {
   showFront = true;
   renderCard();
 });
+
+function t(key, vars = {}) {
+  const dict = I18N[currentLang] || I18N.vi;
+  let text = dict[key] || key;
+
+  for (const [varKey, varValue] of Object.entries(vars)) {
+    text = text.replaceAll(`{${varKey}}`, String(varValue));
+  }
+  return text;
+}
+
+function applyStaticTranslations() {
+  titleText.textContent = t("title");
+  subtitleText.innerHTML = t("subtitle");
+  languageToggleText.textContent = t("languageLabel");
+  importSectionTitle.textContent = t("importTitle");
+  bulkTextLabel.textContent = t("pasteText");
+  browseFileText.textContent = t("browseFile");
+  loadFromTextText.textContent = t("loadFromText");
+  historyTitle.textContent = t("historyTitle");
+  historyNameInput.placeholder = t("historyNamePlaceholder");
+  saveHistoryText.textContent = t("saveToHistory");
+  loadHistoryText.textContent = t("loadSelected");
+  deleteHistoryText.textContent = t("deleteSelected");
+  clearHistoriesText.textContent = t("clearAllHistories");
+  flashcardSectionTitle.textContent = t("flashcardTitle");
+  prevText.textContent = t("prev");
+  flipText.textContent = t("flip");
+  nextText.textContent = t("next");
+  shuffleText.textContent = t("shuffle");
+  speakText.textContent = t("speakEnglish");
+  thEnglish.textContent = t("tableEnglish");
+  thIpa.textContent = t("tableIpa");
+  thVietnamese.textContent = t("tableVietnamese");
+
+  updateVoiceToggleUi();
+  fileNameLabel.textContent = selectedFileName || t("noFileChosen");
+
+  if (lastHistoryStatus) {
+    historyStatus.textContent = t(lastHistoryStatus.key, lastHistoryStatus.vars);
+  }
+}
+
+function setHistoryStatusKey(key, vars = {}) {
+  lastHistoryStatus = { key, vars };
+  historyStatus.textContent = t(key, vars);
+}
+
+function setCookie(name, value, days) {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+}
+
+function getCookie(name) {
+  const nameEq = `${name}=`;
+  const cookies = document.cookie.split(";");
+  for (const c of cookies) {
+    const cookie = c.trim();
+    if (cookie.startsWith(nameEq)) {
+      return decodeURIComponent(cookie.substring(nameEq.length));
+    }
+  }
+  return "";
+}
 
 function applyInputText(text, persistLastList) {
   cards = parseInputToCards(text);
@@ -189,7 +391,7 @@ function saveHistoriesToStorage() {
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(histories));
   } catch {
-    setHistoryStatus("Cannot save histories in this browser.");
+    setHistoryStatusKey("historyInvalidInput");
   }
 }
 
@@ -215,7 +417,7 @@ function renderHistorySelect() {
   if (!histories.length) {
     const option = document.createElement("option");
     option.value = "";
-    option.textContent = "No saved histories";
+    option.textContent = t("savedHistoriesEmpty");
     historySelect.appendChild(option);
     return;
   }
@@ -223,7 +425,7 @@ function renderHistorySelect() {
   for (const entry of histories) {
     const option = document.createElement("option");
     option.value = entry.id;
-    option.textContent = `${entry.name} (${entry.cardCount} cards)`;
+    option.textContent = `${entry.name} (${entry.cardCount})`;
     historySelect.appendChild(option);
   }
 }
@@ -231,13 +433,13 @@ function renderHistorySelect() {
 function saveCurrentInputToHistory() {
   const text = bulkText.value.trim();
   if (!text) {
-    setHistoryStatus("Nothing to save.");
+    setHistoryStatusKey("historyNothingToSave");
     return;
   }
 
   const parsedCards = parseInputToCards(text);
   if (!parsedCards.length) {
-    setHistoryStatus("Input format is invalid.");
+    setHistoryStatusKey("historyInvalidInput");
     return;
   }
 
@@ -259,55 +461,51 @@ function saveCurrentInputToHistory() {
   renderHistorySelect();
   historySelect.value = entry.id;
   saveLastList(text);
-  setHistoryStatus(`Saved "${entry.name}".`);
+  setHistoryStatusKey("historySaved", { name: entry.name });
 }
 
 function loadSelectedHistory() {
   const id = historySelect.value;
   if (!id) {
-    setHistoryStatus("No history selected.");
+    setHistoryStatusKey("historyNoSelection");
     return;
   }
 
   const selected = histories.find((x) => x.id === id);
   if (!selected) {
-    setHistoryStatus("Selected history was not found.");
+    setHistoryStatusKey("historyNotFound");
     return;
   }
 
   bulkText.value = selected.text;
   applyInputText(selected.text, true);
-  setHistoryStatus(`Loaded "${selected.name}".`);
+  setHistoryStatusKey("historyLoaded", { name: selected.name });
 }
 
 function deleteSelectedHistory() {
   const id = historySelect.value;
   if (!id) {
-    setHistoryStatus("No history selected.");
+    setHistoryStatusKey("historyNoSelection");
     return;
   }
 
   const before = histories.length;
   histories = histories.filter((x) => x.id !== id);
   if (histories.length === before) {
-    setHistoryStatus("Selected history was not found.");
+    setHistoryStatusKey("historyNotFound");
     return;
   }
 
   saveHistoriesToStorage();
   renderHistorySelect();
-  setHistoryStatus("Deleted selected history.");
+  setHistoryStatusKey("historyDeleted");
 }
 
 function clearAllHistories() {
   histories = [];
   saveHistoriesToStorage();
   renderHistorySelect();
-  setHistoryStatus("All histories cleared.");
-}
-
-function setHistoryStatus(message) {
-  historyStatus.textContent = message;
+  setHistoryStatusKey("historyCleared");
 }
 
 async function loadDefaultVocabularyFile() {
@@ -338,13 +536,13 @@ async function initializeLocalPersistence() {
   if (lastList.trim()) {
     bulkText.value = lastList;
     applyInputText(lastList, false);
-    setHistoryStatus("Restored last session.");
+    setHistoryStatusKey("historyRestoreSession");
   } else {
     const loadedDefault = await loadDefaultVocabularyFile();
     if (loadedDefault) {
-      setHistoryStatus("Loaded default vocabulary file.");
+      setHistoryStatusKey("historyDefaultLoaded");
     } else {
-      setHistoryStatus("No previous session found.");
+      setHistoryStatusKey("historyNoPrevious");
       renderCard();
     }
   }
@@ -395,7 +593,6 @@ function parseInputToCards(text) {
 function extractEnglishAndIpa(firstColumn) {
   const text = firstColumn.trim();
 
-  // Pattern: "word /ipa/"
   const slashWrapped = text.match(/^(.*?)\s*(\/[^/]+\/)\s*$/);
   if (slashWrapped) {
     return {
@@ -404,7 +601,6 @@ function extractEnglishAndIpa(firstColumn) {
     };
   }
 
-  // Pattern: "word [ipa]"
   const bracketWrapped = text.match(/^(.*?)\s*(\[[^\]]+\])\s*$/);
   if (bracketWrapped) {
     return {
@@ -421,9 +617,18 @@ function renderCardFaces() {
   card.classList.toggle("show-back", !showFront);
 }
 
+function goToNextCard() {
+  if (!cards.length) {
+    return;
+  }
+  currentIndex = (currentIndex + 1) % cards.length;
+  showFront = true;
+  renderCard();
+}
+
 function renderVocabTable() {
   if (!cards.length) {
-    vocabTableBody.innerHTML = '<tr><td colspan="4" class="empty-table">No words loaded</td></tr>';
+    vocabTableBody.innerHTML = `<tr><td colspan="4" class="empty-table">${t("noWordsLoaded")}</td></tr>`;
     return;
   }
 
@@ -454,10 +659,10 @@ function escapeHtml(value) {
 
 async function renderCard() {
   const total = cards.length;
-  countLabel.textContent = `${total} cards`;
+  countLabel.textContent = t("cardsCount", { count: total });
 
   if (!total) {
-    englishWord.textContent = "No word loaded";
+    englishWord.textContent = t("noWordsLoaded");
     vietnameseWord.textContent = "";
     vietnameseFront.textContent = "";
     ipaText.textContent = "";
@@ -473,11 +678,11 @@ async function renderCard() {
 
   const item = cards[currentIndex];
   englishWord.textContent = item.english;
-  vietnameseWord.textContent = item.vietnamese || "Loading meaning...";
-  vietnameseFront.textContent = item.vietnamese || "Loading meaning...";
-  ipaText.textContent = item.ipa || "Loading IPA...";
+  vietnameseWord.textContent = item.vietnamese || t("loadingMeaning");
+  vietnameseFront.textContent = item.vietnamese || t("loadingMeaning");
+  ipaText.textContent = item.ipa || t("loadingIpa");
   wordImage.removeAttribute("src");
-  imageCaption.textContent = "Loading image...";
+  imageCaption.textContent = t("loadingImage");
   indexLabel.textContent = `${currentIndex + 1} / ${total}`;
   renderCardFaces();
 
@@ -487,15 +692,15 @@ async function renderCard() {
     hydrateImage(item)
   ]);
 
-  vietnameseWord.textContent = item.vietnamese || "Vietnamese meaning not available";
-  vietnameseFront.textContent = item.vietnamese || "Vietnamese meaning not available";
-  ipaText.textContent = item.ipa || "IPA not available";
+  vietnameseWord.textContent = item.vietnamese || t("meaningNotAvailable");
+  vietnameseFront.textContent = item.vietnamese || t("meaningNotAvailable");
+  ipaText.textContent = item.ipa || t("ipaNotAvailable");
   if (item.imageUrl) {
     wordImage.src = item.imageUrl;
     wordImage.alt = item.english;
-    imageCaption.textContent = "Image from Wikimedia Commons";
+    imageCaption.textContent = t("imageFromCommons");
   } else {
-    imageCaption.textContent = "Image not available";
+    imageCaption.textContent = t("imageNotAvailable");
   }
 
   renderVocabTable();
@@ -598,7 +803,6 @@ function isRenderableImageInfo(info) {
     return false;
   }
 
-  // Keep browser-friendly image types.
   return (
     mime === "image/jpeg" ||
     mime === "image/jpg" ||
@@ -617,9 +821,7 @@ function speak(text) {
 
 function updateVoiceToggleUi() {
   const isFemale = selectedVoiceGender === "female";
-  voiceToggleBtn.innerHTML = isFemale
-    ? '<span class="btn-icon" aria-hidden="true">♀</span>Voice: Female'
-    : '<span class="btn-icon" aria-hidden="true">♂</span>Voice: Male';
+  voiceToggleText.textContent = isFemale ? t("voiceFemale") : t("voiceMale");
 }
 
 async function speakViaApi(text) {
@@ -708,9 +910,18 @@ function selectBrowserVoice(gender) {
   return nonOpposite || englishVoices[0];
 }
 
-updateVoiceToggleUi();
+const savedLang = getCookie(LANG_COOKIE_KEY);
+if (savedLang === "en" || savedLang === "vi") {
+  currentLang = savedLang;
+} else {
+  currentLang = "vi";
+  setCookie(LANG_COOKIE_KEY, currentLang, 365);
+}
+
+applyStaticTranslations();
 refreshSpeechVoices();
 if ("speechSynthesis" in window) {
   window.speechSynthesis.onvoiceschanged = refreshSpeechVoices;
 }
+
 initializeLocalPersistence();

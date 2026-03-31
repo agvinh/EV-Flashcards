@@ -4,53 +4,52 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EV Flashcards</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="container">
-    <h1>English &lt;-&gt; Vietnamese Flashcards</h1>
-    <p class="subtitle">Import as <code>english</code>, <code>english + ipa[TAB]vietnamese</code>, or <code>english[TAB]ipa[TAB]vietnamese</code></p>
+    <div class="topbar">
+      <h1 id="titleText">English &lt;-&gt; Vietnamese Flashcards</h1>
+      <button id="languageToggleBtn" class="btn btn-language">
+        <span class="btn-icon" aria-hidden="true">🌐</span>
+        <span id="languageToggleText">Ngon ngu: Tieng Viet</span>
+      </button>
+    </div>
+    <p id="subtitleText" class="subtitle">Import as <code>english</code>, <code>english + ipa[TAB]vietnamese</code>, or <code>english[TAB]ipa[TAB]vietnamese</code></p>
 
     <section class="panel">
-      <h2>Import</h2>
-      <label for="bulkText">Paste text</label>
-      <textarea id="bulkText" rows="8" placeholder="eagle&#10;earth&#10;eagle /ˈiːɡəl/	chim đại bàng"></textarea>
+      <h2 id="importSectionTitle">Import</h2>
+      <label id="bulkTextLabel" for="bulkText">Paste text</label>
+      <textarea id="bulkText" rows="8" placeholder="eagle&#10;earth&#10;eagle /ˈiːɡəl/	chim dai bang"></textarea>
 
       <div class="row">
         <input id="fileInput" name="fileInput" class="hidden-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
-        <button id="browseFileBtn" class="btn btn-browse"><span class="btn-icon" aria-hidden="true">☰</span>Browse File</button>
+        <button id="browseFileBtn" class="btn btn-browse"><span class="btn-icon" aria-hidden="true">☰</span><span id="browseFileText">Browse File</span></button>
         <span id="fileNameLabel" class="file-name">No file chosen</span>
-        <button id="loadTextBtn" class="btn btn-import"><span class="btn-icon" aria-hidden="true">⤓</span>Load From Text</button>
+        <button id="loadTextBtn" class="btn btn-import"><span class="btn-icon" aria-hidden="true">⤓</span><span id="loadFromTextText">Load From Text</span></button>
       </div>
 
       <div class="history-block">
-        <h3>Local History</h3>
+        <h3 id="historyTitle">Local History</h3>
         <div class="row">
           <input id="historyNameInput" type="text" placeholder="History name (optional)">
-          <button id="saveHistoryBtn" class="btn btn-save"><span class="btn-icon" aria-hidden="true">⟡</span>Save To History</button>
+          <button id="saveHistoryBtn" class="btn btn-save"><span class="btn-icon" aria-hidden="true">⟡</span><span id="saveHistoryText">Save To History</span></button>
         </div>
         <div class="row">
           <select id="historySelect"></select>
         </div>
         <div class="row">
-          <button id="loadHistoryBtn" class="btn btn-load"><span class="btn-icon" aria-hidden="true">↺</span>Load Selected</button>
-          <button id="deleteHistoryBtn" class="btn btn-delete"><span class="btn-icon" aria-hidden="true">⊖</span>Delete Selected</button>
-          <button id="clearHistoriesBtn" class="btn btn-clear"><span class="btn-icon" aria-hidden="true">⌦</span>Clear All Histories</button>
+          <button id="loadHistoryBtn" class="btn btn-load"><span class="btn-icon" aria-hidden="true">↺</span><span id="loadHistoryText">Load Selected</span></button>
+          <button id="deleteHistoryBtn" class="btn btn-delete"><span class="btn-icon" aria-hidden="true">⊖</span><span id="deleteHistoryText">Delete Selected</span></button>
+          <button id="clearHistoriesBtn" class="btn btn-clear"><span class="btn-icon" aria-hidden="true">⌦</span><span id="clearHistoriesText">Clear All Histories</span></button>
         </div>
         <p id="historyStatus" class="hint"></p>
       </div>
     </section>
 
     <section class="panel">
-      <h2>Flashcard</h2>
-      <div class="toolbar">
-        <button id="prevBtn" class="btn btn-prev"><span class="btn-icon" aria-hidden="true">←</span>Prev</button>
-        <button id="flipBtn" class="btn btn-flip"><span class="btn-icon" aria-hidden="true">⇄</span>Flip</button>
-        <button id="nextBtn" class="btn btn-next"><span class="btn-icon" aria-hidden="true">→</span>Next</button>
-        <button id="shuffleBtn" class="btn btn-shuffle"><span class="btn-icon" aria-hidden="true">⤮</span>Shuffle</button>
-        <button id="voiceToggleBtn" class="btn btn-voice"><span class="btn-icon" aria-hidden="true">♀</span>Voice: Female</button>
-        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">🔊</span>Speak English</button>
-      </div>
+      <h2 id="flashcardSectionTitle">Flashcard</h2>
 
       <div class="status">
         <span id="countLabel">0 cards</span>
@@ -61,10 +60,10 @@
         <table class="vocab-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>English</th>
-              <th>IPA</th>
-              <th>Vietnamese</th>
+              <th id="thIndex">#</th>
+              <th id="thEnglish">English</th>
+              <th id="thIpa">IPA</th>
+              <th id="thVietnamese">Vietnamese</th>
             </tr>
           </thead>
           <tbody id="vocabTableBody">
@@ -73,6 +72,15 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="toolbar">
+        <button id="prevBtn" class="btn btn-prev"><span class="btn-icon" aria-hidden="true">←</span><span id="prevText">Prev</span></button>
+        <button id="flipBtn" class="btn btn-flip"><span class="btn-icon" aria-hidden="true">⇄</span><span id="flipText">Flip</span></button>
+        <button id="nextBtn" class="btn btn-next"><span class="btn-icon" aria-hidden="true">→</span><span id="nextText">Next</span></button>
+        <button id="shuffleBtn" class="btn btn-shuffle"><span class="btn-icon" aria-hidden="true">⤮</span><span id="shuffleText">Shuffle</span></button>
+        <button id="voiceToggleBtn" class="btn btn-voice"><span class="btn-icon" aria-hidden="true">♀</span><span id="voiceToggleText">Voice: Female</span></button>
+        <button id="speakBtn" class="btn btn-speak"><span class="btn-icon" aria-hidden="true">🔊</span><span id="speakText">Speak English</span></button>
       </div>
 
       <article id="card" class="card">
